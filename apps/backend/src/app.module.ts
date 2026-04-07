@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 
 import { AuthGuard } from './auth/auth.guard';
 import { AuthIdentityService } from './auth/auth-identity.service';
@@ -13,6 +13,9 @@ import { PrismaMessagesDao } from './dao/prisma-messages.dao';
 import { PrismaUsersDao } from './dao/prisma-users.dao';
 import { CHATS_DAO, MESSAGES_DAO, USERS_DAO } from './contracts/tokens';
 import { ChatMembersHttpFacade } from './facades/chat-members-http.facade';
+import { DomainExceptionFilter } from './filters/domain-exception.filter';
+import { HttpLoggingInterceptor } from './logging/http-logging.interceptor';
+import { JsonLogger } from './logging/json-logger.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { ChatsService } from './services/chats.service';
 import { MessagesService } from './services/messages.service';
@@ -42,6 +45,14 @@ import { UsersService } from './services/users.service';
     {
       provide: APP_GUARD,
       useClass: AuthGuard,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: DomainExceptionFilter,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: HttpLoggingInterceptor,
     },
   ],
   exports: [UsersService, ChatsService, MessagesService],

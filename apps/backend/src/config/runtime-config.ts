@@ -8,6 +8,8 @@ export interface MockUserConfig {
   email: string;
 }
 
+export type LogLevel = 'DEBUG' | 'INFO' | 'WARNING' | 'ERROR';
+
 export function isAuthEnabled(): boolean {
   return process.env.AUTH_ENABLED === 'true';
 }
@@ -23,4 +25,14 @@ export function getMockUserConfig(): MockUserConfig {
     name: process.env.MOCK_USER_NAME ?? 'Mock User',
     email: process.env.MOCK_USER_EMAIL ?? 'mock-user@local.test',
   };
+}
+
+export function getLogLevel(): LogLevel {
+  const rawValue = process.env.LOG_LEVEL?.trim().toUpperCase();
+
+  if (rawValue === 'DEBUG' || rawValue === 'INFO' || rawValue === 'WARNING' || rawValue === 'ERROR') {
+    return rawValue;
+  }
+
+  return 'INFO';
 }

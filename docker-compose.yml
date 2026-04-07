@@ -26,5 +26,27 @@ services:
       timeout: 5s
       retries: 10
 
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    container_name: tegeran-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${MESSENGER_DB_USER}:${MESSENGER_DB_PASSWORD}@postgres:5432/${MESSENGER_DB_NAME}?schema=public
+      PORT: 3000
+      AUTH_ENABLED: ${AUTH_ENABLED}
+      LOG_LEVEL: ${LOG_LEVEL}
+      MOCK_AUTH_SUBJECT: ${MOCK_AUTH_SUBJECT}
+      MOCK_USER_NAME: ${MOCK_USER_NAME}
+      MOCK_USER_EMAIL: ${MOCK_USER_EMAIL}
+    ports:
+      - "${BACKEND_PORT}:3000"
+
 volumes:
   postgres_data:
