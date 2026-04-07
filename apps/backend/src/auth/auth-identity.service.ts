@@ -1,5 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 
+import { KeycloakAuthService } from './keycloak/keycloak-auth.service';
 import { JsonLogger } from '../logging/json-logger.service';
 import { CurrentUser } from '../domain/current-user';
 import { UsersService } from '../services/users.service';
@@ -15,7 +16,8 @@ interface CurrentUserProfile {
 export class AuthIdentityService {
   constructor(
     private readonly usersService: UsersService,
-    private readonly logger: JsonLogger = new JsonLogger(),
+    private readonly keycloakAuthService: KeycloakAuthService,
+    private readonly logger: JsonLogger,
   ) {}
 
   isAuthEnabled(): boolean {
@@ -24,14 +26,25 @@ export class AuthIdentityService {
 
   async resolveCurrentUser(authorizationHeader?: string): Promise<CurrentUser> {
     const profile = this.isAuthEnabled()
-      ? this.resolveAuthenticatedProfile(authorizationHeader)
+      ? await this.resolveAuthenticatedProfile(authorizationHeader)
       : this.resolveMockProfile();
 
-    await this.usersService.getOrCreateCurrentUser({
-      currentUser: profile.currentUser,
-      name: profile.name,
-      email: profile.email,
-    });
+    if (this.isAuthEnabled()) {
+      const existingUser = await this.usersService.getByAuthSubject(profile.currentUser.authSubject);
+
+      if (!existingUser) {
+        this.logger.warning('Rejected authenticated request because local user is not provisioned', 'AuthIdentityService', {
+          authSubject: profile.currentUser.authSubject,
+        });
+        throw new UnauthorizedException('Local user is not provisioned');
+      }
+    } else {
+      await this.usersService.getOrCreateCurrentUser({
+        currentUser: profile.currentUser,
+        name: profile.name,
+        email: profile.email,
+      });
+    }
 
     this.logger.debug('Current user resolved', 'AuthIdentityService', {
       authSubject: profile.currentUser.authSubject,
@@ -57,7 +70,7 @@ export class AuthIdentityService {
     };
   }
 
-  private resolveAuthenticatedProfile(authorizationHeader?: string): CurrentUserProfile {
+  private async resolveAuthenticatedProfile(authorizationHeader?: string): Promise<CurrentUserProfile> {
     if (!authorizationHeader) {
       this.logger.warning('Missing Authorization header', 'AuthIdentityService');
       throw new UnauthorizedException('Authorization header is required');
@@ -72,12 +85,8 @@ export class AuthIdentityService {
       throw new UnauthorizedException('Authorization header must use Bearer token');
     }
 
-    const authSubject = this.extractAuthSubject(token);
-
-    if (!authSubject) {
-      this.logger.warning('Unable to extract auth subject from token', 'AuthIdentityService');
-      throw new UnauthorizedException('Unable to resolve auth subject from token');
-    }
+    const identity = await this.keycloakAuthService.verifyAccessToken(token);
+    const authSubject = identity.authSubject;
 
     this.logger.info('Identity extracted from Authorization header', 'AuthIdentityService', {
       authSubject,
@@ -85,29 +94,9 @@ export class AuthIdentityService {
 
     return {
       currentUser: { authSubject },
-      name: authSubject,
-      email: this.buildSyntheticEmail(authSubject),
+      name: identity.name ?? authSubject,
+      email: identity.email ?? this.buildSyntheticEmail(authSubject),
     };
-  }
-
-  private extractAuthSubject(token: string): string {
-    const parts = token.split('.');
-
-    if (parts.length === 3) {
-      try {
-        const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8')) as { sub?: unknown };
-
-        if (typeof payload.sub === 'string' && payload.sub.trim()) {
-          this.logger.debug('Extracted auth subject from JWT-like payload', 'AuthIdentityService');
-          return payload.sub.trim();
-        }
-      } catch {
-        this.logger.warning('Failed to parse JWT payload, using raw token as auth subject', 'AuthIdentityService');
-        return token.trim();
-      }
-    }
-
-    return token.trim();
   }
 
   private buildSyntheticEmail(authSubject: string): string {

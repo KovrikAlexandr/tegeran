@@ -4,6 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import request from 'supertest';
 
 import { AppModule } from '../app.module';
+import { KeycloakAuthService } from '../auth/keycloak/keycloak-auth.service';
 import { configureHttpApp } from '../bootstrap';
 import { CHATS_DAO, MESSAGES_DAO, USERS_DAO } from '../contracts/tokens';
 import { ChatMemberRole, ChatType } from '../domain/enums';
@@ -186,6 +187,17 @@ describe('HTTP API', () => {
 });
 
 async function createHttpApp(context: ReturnType<typeof createBackendTestContext>): Promise<INestApplication> {
+  const keycloakAuthServiceStub = {
+    register: jest.fn(),
+    login: jest.fn(),
+    verifyAccessToken: async (token: string) => ({
+      authSubject: token,
+      issuer: 'http://test-issuer',
+      email: `${token}@example.com`,
+      name: token,
+    }),
+  };
+
   const testingModule = await Test.createTestingModule({
     imports: [AppModule],
   })
@@ -200,6 +212,8 @@ async function createHttpApp(context: ReturnType<typeof createBackendTestContext
       $connect: async () => undefined,
       $disconnect: async () => undefined,
     })
+    .overrideProvider(KeycloakAuthService)
+    .useValue(keycloakAuthServiceStub)
     .compile();
 
   const app = testingModule.createNestApplication();

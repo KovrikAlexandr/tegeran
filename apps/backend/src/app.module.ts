@@ -3,6 +3,11 @@ import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 
 import { AuthGuard } from './auth/auth.guard';
 import { AuthIdentityService } from './auth/auth-identity.service';
+import { KeycloakAdminService } from './auth/keycloak/keycloak-admin.service';
+import { KeycloakAuthService } from './auth/keycloak/keycloak-auth.service';
+import { KeycloakJwtService } from './auth/keycloak/keycloak-jwt.service';
+import { KeycloakTokenService } from './auth/keycloak/keycloak-token.service';
+import { AuthController } from './controllers/auth.controller';
 import { ChatsController } from './controllers/chats.controller';
 import { ChatMembersController } from './controllers/chat-members.controller';
 import { HealthController } from './controllers/health.controller';
@@ -23,12 +28,16 @@ import { UsersService } from './services/users.service';
 
 @Module({
   imports: [PrismaModule],
-  controllers: [HealthController, MeController, ChatsController, ChatMembersController, MessagesController],
+  controllers: [HealthController, AuthController, MeController, ChatsController, ChatMembersController, MessagesController],
   providers: [
     UsersService,
     ChatsService,
     MessagesService,
     AuthIdentityService,
+    KeycloakAdminService,
+    KeycloakTokenService,
+    KeycloakJwtService,
+    KeycloakAuthService,
     ChatMembersHttpFacade,
     {
       provide: USERS_DAO,

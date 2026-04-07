@@ -10,6 +10,16 @@ export interface MockUserConfig {
 
 export type LogLevel = 'DEBUG' | 'INFO' | 'WARNING' | 'ERROR';
 
+export interface KeycloakConfig {
+  baseUrl: string;
+  issuerUrl: string;
+  realm: string;
+  clientId: string;
+  adminRealm: string;
+  adminUsername: string;
+  adminPassword: string;
+}
+
 export function isAuthEnabled(): boolean {
   return process.env.AUTH_ENABLED === 'true';
 }
@@ -35,4 +45,22 @@ export function getLogLevel(): LogLevel {
   }
 
   return 'INFO';
+}
+
+export function getKeycloakConfig(): KeycloakConfig {
+  return {
+    baseUrl: normalizeBaseUrl(process.env.KEYCLOAK_BASE_URL ?? 'http://localhost:8081'),
+    issuerUrl: normalizeBaseUrl(
+      process.env.KEYCLOAK_ISSUER_URL ?? `${process.env.KEYCLOAK_BASE_URL ?? 'http://localhost:8081'}/realms/${process.env.KEYCLOAK_REALM ?? 'tegeran'}`,
+    ),
+    realm: process.env.KEYCLOAK_REALM ?? 'tegeran',
+    clientId: process.env.KEYCLOAK_CLIENT_ID ?? 'tegeran-backend',
+    adminRealm: process.env.KEYCLOAK_ADMIN_REALM ?? 'master',
+    adminUsername: process.env.KEYCLOAK_ADMIN_USERNAME ?? 'admin',
+    adminPassword: process.env.KEYCLOAK_ADMIN_PASSWORD ?? 'admin',
+  };
+}
+
+function normalizeBaseUrl(url: string): string {
+  return url.replace(/\/+$/, '');
 }
