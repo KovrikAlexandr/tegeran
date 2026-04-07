@@ -6,5 +6,7 @@
 - Prisma DAO-слой
 - service слой с бизнес-логикой
 - automated tests
+- REST API controllers
+- DTO, auth feature flag и error handling
 
-REST API, controllers, guards, JWT и Keycloak integration на этом этапе не реализуются.
+Keycloak integration и JWT validation на этом этапе не реализуются.

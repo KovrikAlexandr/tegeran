@@ -27,6 +27,7 @@ export interface ChatsDao {
   findAccessibleById(chatId: number, userId: number): Promise<Chat | null>;
   findDirectChatBetweenUsers(firstUserId: number, secondUserId: number): Promise<Chat | null>;
   create(input: CreateChatDaoInput): Promise<Chat>;
+  addMember(chatId: number, userId: number, role: ChatMemberRole): Promise<void>;
   delete(chatId: number): Promise<void>;
   removeMember(chatId: number, userId: number): Promise<void>;
 }

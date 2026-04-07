@@ -138,6 +138,15 @@ class InMemoryChatsDao implements ChatsDao {
     return this.buildChat(chat.id)!;
   }
 
+  async addMember(chatId: number, userId: number, role: ChatMember['role']): Promise<void> {
+    this.store.members.push({
+      id: this.store.nextMemberId++,
+      chatId,
+      userId,
+      role,
+    });
+  }
+
   async delete(chatId: number): Promise<void> {
     this.store.chats = this.store.chats.filter((chat) => chat.id !== chatId);
     this.store.members = this.store.members.filter((member) => member.chatId !== chatId);

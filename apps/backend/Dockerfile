@@ -14,4 +14,4 @@ WORKDIR /app/apps/backend
 RUN npm run db:generate
 RUN npm run build
 
-CMD ["npm", "run", "test"]
+CMD ["npm", "run", "start"]

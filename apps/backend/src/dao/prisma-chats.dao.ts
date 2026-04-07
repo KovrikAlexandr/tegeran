@@ -161,6 +161,16 @@ export class PrismaChatsDao implements ChatsDao {
     return this.mapChat(chat as PrismaChatRecord);
   }
 
+  async addMember(chatId: number, userId: number, role: ChatMemberRole): Promise<void> {
+    await this.prisma.chatMember.create({
+      data: {
+        chatId,
+        userId,
+        role,
+      },
+    });
+  }
+
   async delete(chatId: number): Promise<void> {
     await this.prisma.chat.delete({
       where: { id: chatId },
