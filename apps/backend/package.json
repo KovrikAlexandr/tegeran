@@ -2,15 +2,26 @@
   "name": "@tegeran/backend",
   "private": true,
   "scripts": {
+    "build": "tsc -p tsconfig.build.json",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",
     "db:migrate:dev": "prisma migrate dev",
-    "db:status": "prisma migrate status"
+    "db:status": "prisma migrate status",
+    "test": "jest --runInBand"
   },
   "dependencies": {
-    "@prisma/client": "6.19.3"
+    "@nestjs/common": "11.1.7",
+    "@nestjs/core": "11.1.7",
+    "@prisma/client": "6.19.3",
+    "reflect-metadata": "0.2.2",
+    "rxjs": "7.8.2"
   },
   "devDependencies": {
-    "prisma": "6.19.3"
+    "@types/jest": "30.0.0",
+    "@types/node": "24.6.1",
+    "jest": "30.2.0",
+    "prisma": "6.19.3",
+    "ts-jest": "29.4.5",
+    "typescript": "5.9.3"
   }
 }

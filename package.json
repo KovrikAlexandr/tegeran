@@ -8,6 +8,7 @@
     "db:generate": "npm --workspace @tegeran/backend run db:generate",
     "db:migrate": "npm --workspace @tegeran/backend run db:migrate",
     "db:migrate:dev": "npm --workspace @tegeran/backend run db:migrate:dev",
-    "db:status": "npm --workspace @tegeran/backend run db:status"
+    "db:status": "npm --workspace @tegeran/backend run db:status",
+    "test:backend": "npm --workspace @tegeran/backend run test"
   }
 }
