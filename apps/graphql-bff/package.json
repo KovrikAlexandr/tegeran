@@ -1,4 +1,28 @@
 {
   "name": "@tegeran/graphql-bff",
-  "private": true
+  "private": true,
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/main.js",
+    "start:dev": "tsx src/main.ts"
+  },
+  "dependencies": {
+    "@apollo/server": "5.4.0",
+    "@as-integrations/express5": "1.1.2",
+    "@nestjs/apollo": "13.2.1",
+    "@nestjs/common": "11.1.7",
+    "@nestjs/core": "11.1.7",
+    "@nestjs/graphql": "13.2.0",
+    "@nestjs/platform-express": "11.1.7",
+    "dotenv": "17.2.3",
+    "graphql": "16.11.0",
+    "reflect-metadata": "0.2.2",
+    "rxjs": "7.8.2"
+  },
+  "devDependencies": {
+    "@types/express": "5.0.3",
+    "@types/node": "24.6.1",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3"
+  }
 }
