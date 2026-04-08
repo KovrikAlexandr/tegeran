@@ -1,0 +1,1709 @@
+{
+  "info": {
+    "_postman_id": "c4507b75-5408-42e7-8eab-bd1d9361cd7f",
+    "name": "GraphQL-BFF Manual Flow",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Automated GraphQL-BFF flow based on apps/graphql-bff/README.md. The run is sequential, stores identifiers and tokens, and verifies GraphQL responses."
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (!pm.collectionVariables.get('runSuffix')) {",
+          "  const runSuffix = Date.now() + '-' + Math.floor(Math.random() * 100000);",
+          "  pm.collectionVariables.set('runSuffix', runSuffix);",
+          "  pm.collectionVariables.set('password', 'secret123');",
+          "  pm.collectionVariables.set('userAName', 'Alice GraphQL');",
+          "  pm.collectionVariables.set('userBName', 'Bob GraphQL');",
+          "  pm.collectionVariables.set('userCName', 'Charlie GraphQL');",
+          "  pm.collectionVariables.set('userDName', 'Diana GraphQL');",
+          "  pm.collectionVariables.set('userAEmail', 'alice.graphql.' + runSuffix + '@example.com');",
+          "  pm.collectionVariables.set('userBEmail', 'bob.graphql.' + runSuffix + '@example.com');",
+          "  pm.collectionVariables.set('userCEmail', 'charlie.graphql.' + runSuffix + '@example.com');",
+          "  pm.collectionVariables.set('userDEmail', 'diana.graphql.' + runSuffix + '@example.com');",
+          "  pm.collectionVariables.set('groupChatName', 'Project Team ' + runSuffix);",
+          "  pm.collectionVariables.set('renamedGroupChatName', 'Renamed Project Team ' + runSuffix);",
+          "  pm.collectionVariables.set('directMessageText', 'Hello Bob from Postman ' + runSuffix);",
+          "  pm.collectionVariables.set('groupMessageTextA', 'Hello team from Postman ' + runSuffix);",
+          "  pm.collectionVariables.set('groupMessageTextB', 'Reply from Bob ' + runSuffix);",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001",
+      "type": "string"
+    },
+    {
+      "key": "graphqlUrl",
+      "value": "http://localhost:3001/graphql",
+      "type": "string"
+    },
+    {
+      "key": "runSuffix",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "password",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userAName",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userAEmail",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userAId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userAAuthSubject",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "accessTokenA",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userBName",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userBEmail",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userBId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userBAuthSubject",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "accessTokenB",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userCName",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userCEmail",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userCId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "accessTokenC",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userDName",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userDEmail",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userDId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "accessTokenD",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "directChatId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "groupChatId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "messagesNextCursor",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "groupChatName",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "renamedGroupChatName",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "directMessageText",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "groupMessageTextA",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "groupMessageTextB",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 Health",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"query Health { health { status } }\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{graphqlUrl}}",
+          "host": [
+            "{{graphqlUrl}}"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.test('Health query has no GraphQL errors', function () {",
+              "pm.expect(body.errors).to.be.undefined;",
+              "        });",
+              "        pm.test('Health status is ok', function () {",
+              "pm.expect(body.data.health.status).to.eql('ok');",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 Register User A",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"mutation RegisterA($input: RegisterInput!) { register(input: $input) { id authSubject name email } }\",\n  \"variables\": {\n    \"input\": {\n      \"name\": \"{{userAName}}\",\n      \"email\": \"{{userAEmail}}\",\n      \"password\": \"{{password}}\"\n    }\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{graphqlUrl}}",
+          "host": [
+            "{{graphqlUrl}}"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.expect(body.errors).to.be.undefined;",
+              "        const user = body.data.register;",
+              "        pm.collectionVariables.set('userAId', user.id);",
+              "        pm.collectionVariables.set('userAAuthSubject', user.authSubject);",
+              "        pm.test('User A email matches generated value', function () {",
+              "pm.expect(user.email).to.eql(pm.collectionVariables.get('userAEmail'));",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 Register User B",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"mutation RegisterB($input: RegisterInput!) { register(input: $input) { id authSubject email } }\",\n  \"variables\": {\n    \"input\": {\n      \"name\": \"{{userBName}}\",\n      \"email\": \"{{userBEmail}}\",\n      \"password\": \"{{password}}\"\n    }\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{graphqlUrl}}",
+          "host": [
+            "{{graphqlUrl}}"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.expect(body.errors).to.be.undefined;",
+              "        const user = body.data.register;",
+              "        pm.collectionVariables.set('userBId', user.id);",
+              "        pm.collectionVariables.set('userBAuthSubject', user.authSubject);",
+              "        pm.test('User B email matches generated value', function () {",
+              "pm.expect(user.email).to.eql(pm.collectionVariables.get('userBEmail'));",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 Register User C",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"mutation RegisterC($input: RegisterInput!) { register(input: $input) { id email } }\",\n  \"variables\": {\n    \"input\": {\n      \"name\": \"{{userCName}}\",\n      \"email\": \"{{userCEmail}}\",\n      \"password\": \"{{password}}\"\n    }\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{graphqlUrl}}",
+          "host": [
+            "{{graphqlUrl}}"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.expect(body.errors).to.be.undefined;",
+              "        const user = body.data.register;",
+              "        pm.collectionVariables.set('userCId', user.id);",
+              "        pm.test('User C email matches generated value', function () {",
+              "pm.expect(user.email).to.eql(pm.collectionVariables.get('userCEmail'));",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 Login User A",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"mutation LoginA($input: LoginInput!) { login(input: $input) { accessToken tokenType expiresIn } }\",\n  \"variables\": {\n    \"input\": {\n      \"email\": \"{{userAEmail}}\",\n      \"password\": \"{{password}}\"\n    }\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{graphqlUrl}}",
+          "host": [
+            "{{graphqlUrl}}"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.expect(body.errors).to.be.undefined;",
+              "        const login = body.data.login;",
+              "        pm.collectionVariables.set('accessTokenA', login.accessToken);",
+              "        pm.test('User A token is present', function () {",
+              "pm.expect(login.accessToken).to.be.a('string').and.not.empty;",
+              "pm.expect(login.tokenType).to.eql('Bearer');",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 Login User B",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"mutation LoginB($input: LoginInput!) { login(input: $input) { accessToken } }\",\n  \"variables\": {\n    \"input\": {\n      \"email\": \"{{userBEmail}}\",\n      \"password\": \"{{password}}\"\n    }\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{graphqlUrl}}",
+          "host": [
+            "{{graphqlUrl}}"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.expect(body.errors).to.be.undefined;",
+              "        pm.collectionVariables.set('accessTokenB', body.data.login.accessToken);",
+              "        pm.test('User B token is present', function () {",
+              "pm.expect(body.data.login.accessToken).to.be.a('string').and.not.empty;",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 Login User C",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"mutation LoginC($input: LoginInput!) { login(input: $input) { accessToken } }\",\n  \"variables\": {\n    \"input\": {\n      \"email\": \"{{userCEmail}}\",\n      \"password\": \"{{password}}\"\n    }\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{graphqlUrl}}",
+          "host": [
+            "{{graphqlUrl}}"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.expect(body.errors).to.be.undefined;",
+              "        pm.collectionVariables.set('accessTokenC', body.data.login.accessToken);",
+              "        pm.test('User C token is present', function () {",
+              "pm.expect(body.data.login.accessToken).to.be.a('string').and.not.empty;",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 Me for User A",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenA}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"query Me { me { id authSubject name email } }\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{graphqlUrl}}",
+          "host": [
+            "{{graphqlUrl}}"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.expect(body.errors).to.be.undefined;",
+              "        const user = body.data.me;",
+              "        pm.test('Me returns user A', function () {",
+              "pm.expect(user.email).to.eql(pm.collectionVariables.get('userAEmail'));",
+              "pm.expect(user.id).to.eql(pm.collectionVariables.get('userAId'));",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "09 Initial Chats for User A",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenA}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"query Chats { chats { id name type lastMessage { content createdAt } } }\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{graphqlUrl}}",
+          "host": [
+            "{{graphqlUrl}}"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.expect(body.errors).to.be.undefined;",
+              "        pm.test('Chats query returns an array', function () {",
+              "pm.expect(body.data.chats).to.be.an('array');",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10 Create or Get Direct Chat",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenA}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"mutation DirectChat($input: GetOrCreateDirectChatInput!) { getOrCreateDirectChat(input: $input) { id type members { role user { email } } } }\",\n  \"variables\": {\n    \"input\": {\n      \"email\": \"{{userBEmail}}\"\n    }\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{graphqlUrl}}",
+          "host": [
+            "{{graphqlUrl}}"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.expect(body.errors).to.be.undefined;",
+              "        const chat = body.data.getOrCreateDirectChat;",
+              "        pm.collectionVariables.set('directChatId', chat.id);",
+              "        pm.test('Direct chat is returned', function () {",
+              "pm.expect(chat.type).to.eql('DIRECT');",
+              "pm.expect(chat.members).to.have.length(2);",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "11 Repeat Direct Chat Without Duplicate",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenA}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"mutation DirectChatAgain($input: GetOrCreateDirectChatInput!) { getOrCreateDirectChat(input: $input) { id type } }\",\n  \"variables\": {\n    \"input\": {\n      \"email\": \"{{userBEmail}}\"\n    }\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{graphqlUrl}}",
+          "host": [
+            "{{graphqlUrl}}"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.expect(body.errors).to.be.undefined;",
+              "        pm.test('Repeated direct chat returns same id', function () {",
+              "pm.expect(body.data.getOrCreateDirectChat.id).to.eql(pm.collectionVariables.get('directChatId'));",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "12 Create Group Chat",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenA}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"mutation CreateGroup($input: CreateGroupChatInput!) { createGroupChat(input: $input) { id name type members { role user { email } } } }\",\n  \"variables\": {\n    \"input\": {\n      \"name\": \"{{groupChatName}}\",\n      \"memberEmails\": [\n        \"{{userBEmail}}\",\n        \"{{userCEmail}}\"\n      ]\n    }\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{graphqlUrl}}",
+          "host": [
+            "{{graphqlUrl}}"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.expect(body.errors).to.be.undefined;",
+              "        const chat = body.data.createGroupChat;",
+              "        pm.collectionVariables.set('groupChatId', chat.id);",
+              "        pm.test('Group chat is created', function () {",
+              "pm.expect(chat.type).to.eql('GROUP');",
+              "pm.expect(chat.name).to.eql(pm.collectionVariables.get('groupChatName'));",
+              "pm.expect(chat.members).to.have.length(3);",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "13 Get Group Chat Members",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenA}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"query ChatMembers($chatId: ID!) { chatMembers(chatId: $chatId) { role user { id email name } } }\",\n  \"variables\": {\n    \"chatId\": \"{{groupChatId}}\"\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{graphqlUrl}}",
+          "host": [
+            "{{graphqlUrl}}"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.expect(body.errors).to.be.undefined;",
+              "        const members = body.data.chatMembers;",
+              "        pm.test('Alice is owner and Bob/Charlie are members', function () {",
+              "const roles = Object.fromEntries(members.map(function (member) {",
+              "  return [member.user.email, member.role];",
+              "}));",
+              "pm.expect(roles[pm.collectionVariables.get('userAEmail')]).to.eql('OWNER');",
+              "pm.expect(roles[pm.collectionVariables.get('userBEmail')]).to.eql('MEMBER');",
+              "pm.expect(roles[pm.collectionVariables.get('userCEmail')]).to.eql('MEMBER');",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "14 Register User D",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"mutation RegisterD($input: RegisterInput!) { register(input: $input) { id email } }\",\n  \"variables\": {\n    \"input\": {\n      \"name\": \"{{userDName}}\",\n      \"email\": \"{{userDEmail}}\",\n      \"password\": \"{{password}}\"\n    }\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{graphqlUrl}}",
+          "host": [
+            "{{graphqlUrl}}"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.expect(body.errors).to.be.undefined;",
+              "        pm.expect(body.data.register.email).to.eql(pm.collectionVariables.get('userDEmail'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "15 Login User D",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"mutation LoginD($input: LoginInput!) { login(input: $input) { accessToken } }\",\n  \"variables\": {\n    \"input\": {\n      \"email\": \"{{userDEmail}}\",\n      \"password\": \"{{password}}\"\n    }\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{graphqlUrl}}",
+          "host": [
+            "{{graphqlUrl}}"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.expect(body.errors).to.be.undefined;",
+              "        pm.collectionVariables.set('accessTokenD', body.data.login.accessToken);",
+              "        pm.test('User D token is present', function () {",
+              "pm.expect(body.data.login.accessToken).to.be.a('string').and.not.empty;",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "16 Me for User D",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenD}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"query MeD { me { id email } }\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{graphqlUrl}}",
+          "host": [
+            "{{graphqlUrl}}"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.expect(body.errors).to.be.undefined;",
+              "        pm.collectionVariables.set('userDId', body.data.me.id);",
+              "        pm.test('Me returns user D', function () {",
+              "pm.expect(body.data.me.email).to.eql(pm.collectionVariables.get('userDEmail'));",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "17 Add Member D to Group Chat",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenA}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"mutation AddMember($input: AddMemberToChatInput!) { addMemberToChat(input: $input) { chatId userId role user { email } } }\",\n  \"variables\": {\n    \"input\": {\n      \"chatId\": \"{{groupChatId}}\",\n      \"userId\": \"{{userDId}}\"\n    }\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{graphqlUrl}}",
+          "host": [
+            "{{graphqlUrl}}"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.expect(body.errors).to.be.undefined;",
+              "        pm.test('D is added as member', function () {",
+              "pm.expect(body.data.addMemberToChat.userId).to.eql(pm.collectionVariables.get('userDId'));",
+              "pm.expect(body.data.addMemberToChat.role).to.eql('MEMBER');",
+              "pm.expect(body.data.addMemberToChat.user.email).to.eql(pm.collectionVariables.get('userDEmail'));",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "18 Verify Members After Add",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenA}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"query ChatMembersAfterAdd($chatId: ID!) { chatMembers(chatId: $chatId) { user { email } } }\",\n  \"variables\": {\n    \"chatId\": \"{{groupChatId}}\"\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{graphqlUrl}}",
+          "host": [
+            "{{graphqlUrl}}"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.expect(body.errors).to.be.undefined;",
+              "        const emails = body.data.chatMembers.map(function (member) {",
+              "return member.user.email;",
+              "        });",
+              "        pm.test('D is present in members list', function () {",
+              "pm.expect(emails).to.include(pm.collectionVariables.get('userDEmail'));",
+              "pm.expect(body.data.chatMembers).to.have.length(4);",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "19 Remove Member C by Email",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenA}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"mutation RemoveMember($input: RemoveMemberFromChatInput!) { removeMemberFromChat(input: $input) }\",\n  \"variables\": {\n    \"input\": {\n      \"chatId\": \"{{groupChatId}}\",\n      \"email\": \"{{userCEmail}}\"\n    }\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{graphqlUrl}}",
+          "host": [
+            "{{graphqlUrl}}"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.expect(body.errors).to.be.undefined;",
+              "        pm.test('Remove member mutation returns true', function () {",
+              "pm.expect(body.data.removeMemberFromChat).to.eql(true);",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "20 Verify Members After Remove",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenA}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"query ChatMembersAfterRemove($chatId: ID!) { chatMembers(chatId: $chatId) { user { email } } }\",\n  \"variables\": {\n    \"chatId\": \"{{groupChatId}}\"\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{graphqlUrl}}",
+          "host": [
+            "{{graphqlUrl}}"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.expect(body.errors).to.be.undefined;",
+              "        const emails = body.data.chatMembers.map(function (member) {",
+              "return member.user.email;",
+              "        });",
+              "        pm.test('C is absent and D remains in group', function () {",
+              "pm.expect(emails).to.not.include(pm.collectionVariables.get('userCEmail'));",
+              "pm.expect(emails).to.include(pm.collectionVariables.get('userDEmail'));",
+              "pm.expect(body.data.chatMembers).to.have.length(3);",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "21 Send Direct Message",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenA}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"mutation SendDirectMessage($input: SendMessageInput!) { sendMessage(input: $input) { id chatId senderId content createdAt } }\",\n  \"variables\": {\n    \"input\": {\n      \"chatId\": \"{{directChatId}}\",\n      \"content\": \"{{directMessageText}}\"\n    }\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{graphqlUrl}}",
+          "host": [
+            "{{graphqlUrl}}"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.expect(body.errors).to.be.undefined;",
+              "        pm.test('Direct message content matches', function () {",
+              "pm.expect(body.data.sendMessage.chatId).to.eql(pm.collectionVariables.get('directChatId'));",
+              "pm.expect(body.data.sendMessage.content).to.eql(pm.collectionVariables.get('directMessageText'));",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "22 Send Group Message from A",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenA}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"mutation SendGroupMessageA($input: SendMessageInput!) { sendMessage(input: $input) { id chatId content createdAt } }\",\n  \"variables\": {\n    \"input\": {\n      \"chatId\": \"{{groupChatId}}\",\n      \"content\": \"{{groupMessageTextA}}\"\n    }\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{graphqlUrl}}",
+          "host": [
+            "{{graphqlUrl}}"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.expect(body.errors).to.be.undefined;",
+              "        pm.test('First group message matches', function () {",
+              "pm.expect(body.data.sendMessage.content).to.eql(pm.collectionVariables.get('groupMessageTextA'));",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "23 Send Group Message from B",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenB}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"mutation SendGroupMessageB($input: SendMessageInput!) { sendMessage(input: $input) { id chatId content createdAt } }\",\n  \"variables\": {\n    \"input\": {\n      \"chatId\": \"{{groupChatId}}\",\n      \"content\": \"{{groupMessageTextB}}\"\n    }\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{graphqlUrl}}",
+          "host": [
+            "{{graphqlUrl}}"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.expect(body.errors).to.be.undefined;",
+              "        pm.test('Second group message matches', function () {",
+              "pm.expect(body.data.sendMessage.content).to.eql(pm.collectionVariables.get('groupMessageTextB'));",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "24 Get Group Messages Page 1",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenA}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"query MessagesPage1($chatId: ID!, $limit: Int, $cursor: String) { messages(chatId: $chatId, limit: $limit, cursor: $cursor) { items { id content createdAt } nextCursor hasMore } }\",\n  \"variables\": {\n    \"chatId\": \"{{groupChatId}}\",\n    \"limit\": 1,\n    \"cursor\": null\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{graphqlUrl}}",
+          "host": [
+            "{{graphqlUrl}}"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.expect(body.errors).to.be.undefined;",
+              "        const connection = body.data.messages;",
+              "        pm.collectionVariables.set('messagesNextCursor', connection.nextCursor);",
+              "        pm.test('Page 1 returns first group message and cursor', function () {",
+              "pm.expect(connection.items).to.have.length(1);",
+              "pm.expect(connection.items[0].content).to.eql(pm.collectionVariables.get('groupMessageTextA'));",
+              "pm.expect(connection.hasMore).to.eql(true);",
+              "pm.expect(connection.nextCursor).to.be.a('string').and.not.empty;",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "25 Get Group Messages Page 2",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenA}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"query MessagesPage2($chatId: ID!, $limit: Int, $cursor: String) { messages(chatId: $chatId, limit: $limit, cursor: $cursor) { items { id content createdAt } nextCursor hasMore } }\",\n  \"variables\": {\n    \"chatId\": \"{{groupChatId}}\",\n    \"limit\": 1,\n    \"cursor\": \"{{messagesNextCursor}}\"\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{graphqlUrl}}",
+          "host": [
+            "{{graphqlUrl}}"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.expect(body.errors).to.be.undefined;",
+              "        const connection = body.data.messages;",
+              "        pm.test('Page 2 returns second group message', function () {",
+              "pm.expect(connection.items).to.have.length(1);",
+              "pm.expect(connection.items[0].content).to.eql(pm.collectionVariables.get('groupMessageTextB'));",
+              "pm.expect(connection.hasMore).to.eql(false);",
+              "pm.expect(connection.nextCursor).to.eql(null);",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "26 Rename Group Chat",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenA}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"mutation RenameGroup($input: RenameGroupChatInput!) { renameGroupChat(input: $input) { id name type } }\",\n  \"variables\": {\n    \"input\": {\n      \"chatId\": \"{{groupChatId}}\",\n      \"name\": \"{{renamedGroupChatName}}\"\n    }\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{graphqlUrl}}",
+          "host": [
+            "{{graphqlUrl}}"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.expect(body.errors).to.be.undefined;",
+              "        pm.test('Group chat is renamed', function () {",
+              "pm.expect(body.data.renameGroupChat.name).to.eql(pm.collectionVariables.get('renamedGroupChatName'));",
+              "pm.expect(body.data.renameGroupChat.type).to.eql('GROUP');",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "27 Delete Group Chat",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenA}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"mutation DeleteChat($chatId: ID!) { deleteChat(chatId: $chatId) }\",\n  \"variables\": {\n    \"chatId\": \"{{groupChatId}}\"\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{graphqlUrl}}",
+          "host": [
+            "{{graphqlUrl}}"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.expect(body.errors).to.be.undefined;",
+              "        pm.test('Delete chat mutation returns true', function () {",
+              "pm.expect(body.data.deleteChat).to.eql(true);",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "28 Verify Deleted Chat Returns GraphQL Error",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenA}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"query DeletedChat($id: ID!) { chat(id: $id) { id name } }\",\n  \"variables\": {\n    \"id\": \"{{groupChatId}}\"\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{graphqlUrl}}",
+          "host": [
+            "{{graphqlUrl}}"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.test('Deleted chat query returns errors', function () {",
+              "pm.expect(body.errors).to.be.an('array').and.not.empty;",
+              "pm.expect(body.errors[0].message.toLowerCase()).to.include('not found');",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "29 Verify Chats After Delete",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenA}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"query ChatsAfterDelete { chats { id type } }\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{graphqlUrl}}",
+          "host": [
+            "{{graphqlUrl}}"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.expect(body.errors).to.be.undefined;",
+              "        const chatIds = body.data.chats.map(function (chat) {",
+              "return chat.id;",
+              "        });",
+              "        pm.test('Group chat is gone and direct chat remains', function () {",
+              "pm.expect(chatIds).to.not.include(pm.collectionVariables.get('groupChatId'));",
+              "pm.expect(chatIds).to.include(pm.collectionVariables.get('directChatId'));",
+              "        });"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -88,5 +88,23 @@ services:
     ports:
       - "${BACKEND_PORT}:3000"
 
+  graphql-bff:
+    build:
+      context: .
+      dockerfile: apps/graphql-bff/Dockerfile
+    container_name: tegeran-graphql-bff
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_started
+    env_file:
+      - .env
+    environment:
+      PORT: 3001
+      BACKEND_API_URL: http://backend:3000/api/v1
+      LOG_LEVEL: ${LOG_LEVEL}
+    ports:
+      - "${GRAPHQL_BFF_PORT}:3001"
+
 volumes:
   postgres_data:

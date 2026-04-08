@@ -1,0 +1,123 @@
+type HealthStatus {
+  status: String!
+}
+
+type User {
+  id: ID!
+  authSubject: String!
+  name: String!
+  email: String!
+}
+
+enum ChatType {
+  DIRECT
+  GROUP
+}
+
+enum ChatMemberRole {
+  OWNER
+  MEMBER
+}
+
+type ChatLastMessage {
+  content: String!
+  createdAt: String!
+}
+
+type ChatMember {
+  id: ID!
+  chatId: ID!
+  userId: ID!
+  role: ChatMemberRole!
+  user: User!
+}
+
+type Chat {
+  id: ID!
+  name: String
+  type: ChatType!
+  members: [ChatMember!]!
+  lastMessage: ChatLastMessage
+}
+
+type Message {
+  id: ID!
+  content: String!
+  senderId: ID!
+  chatId: ID!
+  createdAt: String!
+}
+
+type MessageConnection {
+  items: [Message!]!
+  nextCursor: String
+  hasMore: Boolean!
+}
+
+type LoginResult {
+  accessToken: String!
+  tokenType: String!
+  expiresIn: Int!
+}
+
+input RegisterInput {
+  name: String!
+  email: String!
+  password: String!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+input GetOrCreateDirectChatInput {
+  email: String!
+}
+
+input CreateGroupChatInput {
+  name: String!
+  memberEmails: [String!]!
+}
+
+input RenameGroupChatInput {
+  chatId: ID!
+  name: String!
+}
+
+input SendMessageInput {
+  chatId: ID!
+  content: String!
+}
+
+input AddMemberToChatInput {
+  chatId: ID!
+  userId: ID!
+}
+
+input RemoveMemberFromChatInput {
+  chatId: ID!
+  email: String!
+}
+
+type Query {
+  health: HealthStatus!
+  me: User!
+  chats: [Chat!]!
+  chat(id: ID!): Chat!
+  chatMembers(chatId: ID!): [ChatMember!]!
+  messages(chatId: ID!, limit: Int = 50, cursor: String): MessageConnection!
+}
+
+type Mutation {
+  register(input: RegisterInput!): User!
+  login(input: LoginInput!): LoginResult!
+  getOrCreateDirectChat(input: GetOrCreateDirectChatInput!): Chat!
+  createGroupChat(input: CreateGroupChatInput!): Chat!
+  renameGroupChat(input: RenameGroupChatInput!): Chat!
+  sendMessage(input: SendMessageInput!): Message!
+  addMemberToChat(input: AddMemberToChatInput!): ChatMember!
+  removeMemberFromChat(input: RemoveMemberFromChatInput!): Boolean!
+  leaveChat(chatId: ID!): Boolean!
+  deleteChat(chatId: ID!): Boolean!
+}
