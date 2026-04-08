@@ -1,0 +1,1602 @@
+{
+  "info": {
+    "_postman_id": "dc9b9f35-708f-418e-aa51-23f2b23bebea",
+    "name": "Backend REST API Flow",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Automated backend REST flow based on the existing GraphQL-BFF manual scenario, adapted to actual backend REST contracts."
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (!pm.collectionVariables.get('runSuffix')) {",
+          "  const runSuffix = Date.now() + '-' + Math.floor(Math.random() * 100000);",
+          "  pm.collectionVariables.set('runSuffix', runSuffix);",
+          "  pm.collectionVariables.set('password', 'secret123');",
+          "  pm.collectionVariables.set('userAName', 'Alice REST');",
+          "  pm.collectionVariables.set('userBName', 'Bob REST');",
+          "  pm.collectionVariables.set('userCName', 'Charlie REST');",
+          "  pm.collectionVariables.set('userDName', 'Diana REST');",
+          "  pm.collectionVariables.set('userAEmail', 'alice.rest.' + runSuffix + '@example.com');",
+          "  pm.collectionVariables.set('userBEmail', 'bob.rest.' + runSuffix + '@example.com');",
+          "  pm.collectionVariables.set('userCEmail', 'charlie.rest.' + runSuffix + '@example.com');",
+          "  pm.collectionVariables.set('userDEmail', 'diana.rest.' + runSuffix + '@example.com');",
+          "  pm.collectionVariables.set('groupChatName', 'Project Team ' + runSuffix);",
+          "  pm.collectionVariables.set('renamedGroupChatName', 'Renamed Project Team ' + runSuffix);",
+          "  pm.collectionVariables.set('directMessageText', 'Hello Bob from backend Postman ' + runSuffix);",
+          "  pm.collectionVariables.set('groupMessageTextA', 'Hello team from backend Postman ' + runSuffix);",
+          "  pm.collectionVariables.set('groupMessageTextB', 'Reply from Bob backend ' + runSuffix);",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "apiBaseUrl",
+      "value": "http://localhost:3000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "runSuffix",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "password",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userAName",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userAEmail",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userAId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userAAuthSubject",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "accessTokenA",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userBName",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userBEmail",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userBId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "accessTokenB",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userCName",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userCEmail",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userCId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "accessTokenC",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userDName",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userDEmail",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userDId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "accessTokenD",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "directChatId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "groupChatId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "groupChatName",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "renamedGroupChatName",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "directMessageText",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "groupMessageTextA",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "groupMessageTextB",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{apiBaseUrl}}/health",
+          "host": [
+            "{{apiBaseUrl}}"
+          ],
+          "path": [
+            "health"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.test('Health status is ok', function () {",
+              "pm.expect(body.status).to.eql('ok');",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 Register User A",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBaseUrl}}/auth/register",
+          "host": [
+            "{{apiBaseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "register"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"{{userAName}}\",\n  \"email\": \"{{userAEmail}}\",\n  \"password\": \"{{password}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 201', function () {",
+              "pm.response.to.have.status(201);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.collectionVariables.set('userAId', body.id);",
+              "        pm.collectionVariables.set('userAAuthSubject', body.authSubject);",
+              "        pm.test('User A registration payload is returned', function () {",
+              "pm.expect(body.email).to.eql(pm.collectionVariables.get('userAEmail'));",
+              "pm.expect(body.authSubject).to.be.a('string').and.not.empty;",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 Register User B",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBaseUrl}}/auth/register",
+          "host": [
+            "{{apiBaseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "register"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"{{userBName}}\",\n  \"email\": \"{{userBEmail}}\",\n  \"password\": \"{{password}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 201', function () {",
+              "pm.response.to.have.status(201);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.collectionVariables.set('userBId', body.id);",
+              "        pm.test('User B registration payload is returned', function () {",
+              "pm.expect(body.email).to.eql(pm.collectionVariables.get('userBEmail'));",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 Register User C",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBaseUrl}}/auth/register",
+          "host": [
+            "{{apiBaseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "register"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"{{userCName}}\",\n  \"email\": \"{{userCEmail}}\",\n  \"password\": \"{{password}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 201', function () {",
+              "pm.response.to.have.status(201);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.collectionVariables.set('userCId', body.id);",
+              "        pm.test('User C registration payload is returned', function () {",
+              "pm.expect(body.email).to.eql(pm.collectionVariables.get('userCEmail'));",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 Login User A",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBaseUrl}}/auth/login",
+          "host": [
+            "{{apiBaseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{userAEmail}}\",\n  \"password\": \"{{password}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.collectionVariables.set('accessTokenA', body.accessToken);",
+              "        pm.test('User A token is present', function () {",
+              "pm.expect(body.accessToken).to.be.a('string').and.not.empty;",
+              "pm.expect(body.tokenType).to.eql('Bearer');",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 Login User B",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBaseUrl}}/auth/login",
+          "host": [
+            "{{apiBaseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{userBEmail}}\",\n  \"password\": \"{{password}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.collectionVariables.set('accessTokenB', body.accessToken);",
+              "        pm.test('User B token is present', function () {",
+              "pm.expect(body.accessToken).to.be.a('string').and.not.empty;",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 Login User C",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBaseUrl}}/auth/login",
+          "host": [
+            "{{apiBaseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{userCEmail}}\",\n  \"password\": \"{{password}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.collectionVariables.set('accessTokenC', body.accessToken);",
+              "        pm.test('User C token is present', function () {",
+              "pm.expect(body.accessToken).to.be.a('string').and.not.empty;",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 Me for User A",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenA}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBaseUrl}}/me",
+          "host": [
+            "{{apiBaseUrl}}"
+          ],
+          "path": [
+            "me"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.test('Me returns user A', function () {",
+              "pm.expect(body.email).to.eql(pm.collectionVariables.get('userAEmail'));",
+              "pm.expect(body.id).to.eql(Number(pm.collectionVariables.get('userAId')));",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "09 Initial Chats for User A",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenA}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBaseUrl}}/chats",
+          "host": [
+            "{{apiBaseUrl}}"
+          ],
+          "path": [
+            "chats"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.test('Chats endpoint returns an array', function () {",
+              "pm.expect(body).to.be.an('array');",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10 Create or Get Direct Chat",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenA}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBaseUrl}}/chats/direct",
+          "host": [
+            "{{apiBaseUrl}}"
+          ],
+          "path": [
+            "chats",
+            "direct"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{userBEmail}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.collectionVariables.set('directChatId', body.id);",
+              "        pm.test('Direct chat is returned', function () {",
+              "pm.expect(body.type).to.eql('DIRECT');",
+              "pm.expect(body.members).to.have.length(2);",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "11 Repeat Direct Chat Without Duplicate",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenA}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBaseUrl}}/chats/direct",
+          "host": [
+            "{{apiBaseUrl}}"
+          ],
+          "path": [
+            "chats",
+            "direct"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{userBEmail}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.test('Repeated direct chat returns same id', function () {",
+              "pm.expect(String(body.id)).to.eql(pm.collectionVariables.get('directChatId'));",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "12 Create Group Chat",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenA}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBaseUrl}}/chats/group",
+          "host": [
+            "{{apiBaseUrl}}"
+          ],
+          "path": [
+            "chats",
+            "group"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"{{groupChatName}}\",\n  \"memberEmails\": [\n    \"{{userBEmail}}\",\n    \"{{userCEmail}}\"\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 201', function () {",
+              "pm.response.to.have.status(201);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.collectionVariables.set('groupChatId', body.id);",
+              "        pm.test('Group chat is created', function () {",
+              "pm.expect(body.type).to.eql('GROUP');",
+              "pm.expect(body.name).to.eql(pm.collectionVariables.get('groupChatName'));",
+              "pm.expect(body.members).to.have.length(3);",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "13 Get Group Chat Members",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenA}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBaseUrl}}/chats/{{groupChatId}}/members",
+          "host": [
+            "{{apiBaseUrl}}"
+          ],
+          "path": [
+            "chats",
+            "{{groupChatId}}",
+            "members"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.test('Alice is owner and Bob/Charlie are members', function () {",
+              "const roles = Object.fromEntries(body.map(function (member) {",
+              "  return [member.user.email, member.role];",
+              "}));",
+              "pm.expect(roles[pm.collectionVariables.get('userAEmail')]).to.eql('OWNER');",
+              "pm.expect(roles[pm.collectionVariables.get('userBEmail')]).to.eql('MEMBER');",
+              "pm.expect(roles[pm.collectionVariables.get('userCEmail')]).to.eql('MEMBER');",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "14 Register User D",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBaseUrl}}/auth/register",
+          "host": [
+            "{{apiBaseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "register"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"{{userDName}}\",\n  \"email\": \"{{userDEmail}}\",\n  \"password\": \"{{password}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 201', function () {",
+              "pm.response.to.have.status(201);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.test('User D registration payload is returned', function () {",
+              "pm.expect(body.email).to.eql(pm.collectionVariables.get('userDEmail'));",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "15 Login User D",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBaseUrl}}/auth/login",
+          "host": [
+            "{{apiBaseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{userDEmail}}\",\n  \"password\": \"{{password}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.collectionVariables.set('accessTokenD', body.accessToken);",
+              "        pm.test('User D token is present', function () {",
+              "pm.expect(body.accessToken).to.be.a('string').and.not.empty;",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "16 Me for User D",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenD}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBaseUrl}}/me",
+          "host": [
+            "{{apiBaseUrl}}"
+          ],
+          "path": [
+            "me"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.collectionVariables.set('userDId', body.id);",
+              "        pm.test('Me returns user D', function () {",
+              "pm.expect(body.email).to.eql(pm.collectionVariables.get('userDEmail'));",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "17 Add Member D to Group Chat",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenA}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBaseUrl}}/chats/{{groupChatId}}/members",
+          "host": [
+            "{{apiBaseUrl}}"
+          ],
+          "path": [
+            "chats",
+            "{{groupChatId}}",
+            "members"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": \"{{userDId}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 201', function () {",
+              "pm.response.to.have.status(201);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.test('D is added as member', function () {",
+              "pm.expect(String(body.userId)).to.eql(pm.collectionVariables.get('userDId'));",
+              "pm.expect(body.role).to.eql('MEMBER');",
+              "pm.expect(body.user.email).to.eql(pm.collectionVariables.get('userDEmail'));",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "18 Verify Members After Add",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenA}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBaseUrl}}/chats/{{groupChatId}}/members",
+          "host": [
+            "{{apiBaseUrl}}"
+          ],
+          "path": [
+            "chats",
+            "{{groupChatId}}",
+            "members"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        const emails = body.map(function (member) {",
+              "return member.user.email;",
+              "        });",
+              "        pm.test('D is present in members list', function () {",
+              "pm.expect(emails).to.include(pm.collectionVariables.get('userDEmail'));",
+              "pm.expect(body).to.have.length(4);",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "19 Remove Member C by Email",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenA}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBaseUrl}}/chats/{{groupChatId}}/members/by-email",
+          "host": [
+            "{{apiBaseUrl}}"
+          ],
+          "path": [
+            "chats",
+            "{{groupChatId}}",
+            "members",
+            "by-email"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{userCEmail}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 204', function () {",
+              "pm.response.to.have.status(204);",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "20 Verify Members After Remove",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenA}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBaseUrl}}/chats/{{groupChatId}}/members",
+          "host": [
+            "{{apiBaseUrl}}"
+          ],
+          "path": [
+            "chats",
+            "{{groupChatId}}",
+            "members"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        const emails = body.map(function (member) {",
+              "return member.user.email;",
+              "        });",
+              "        pm.test('C is absent and D remains in group', function () {",
+              "pm.expect(emails).to.not.include(pm.collectionVariables.get('userCEmail'));",
+              "pm.expect(emails).to.include(pm.collectionVariables.get('userDEmail'));",
+              "pm.expect(body).to.have.length(3);",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "21 Send Direct Message",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenA}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBaseUrl}}/chats/{{directChatId}}/messages",
+          "host": [
+            "{{apiBaseUrl}}"
+          ],
+          "path": [
+            "chats",
+            "{{directChatId}}",
+            "messages"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"content\": \"{{directMessageText}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 201', function () {",
+              "pm.response.to.have.status(201);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.test('Direct message content matches', function () {",
+              "pm.expect(String(body.chatId)).to.eql(pm.collectionVariables.get('directChatId'));",
+              "pm.expect(body.content).to.eql(pm.collectionVariables.get('directMessageText'));",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "22 Send Group Message from A",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenA}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBaseUrl}}/chats/{{groupChatId}}/messages",
+          "host": [
+            "{{apiBaseUrl}}"
+          ],
+          "path": [
+            "chats",
+            "{{groupChatId}}",
+            "messages"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"content\": \"{{groupMessageTextA}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 201', function () {",
+              "pm.response.to.have.status(201);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.test('First group message matches', function () {",
+              "pm.expect(body.content).to.eql(pm.collectionVariables.get('groupMessageTextA'));",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "23 Send Group Message from B",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenB}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBaseUrl}}/chats/{{groupChatId}}/messages",
+          "host": [
+            "{{apiBaseUrl}}"
+          ],
+          "path": [
+            "chats",
+            "{{groupChatId}}",
+            "messages"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"content\": \"{{groupMessageTextB}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 201', function () {",
+              "pm.response.to.have.status(201);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.test('Second group message matches', function () {",
+              "pm.expect(body.content).to.eql(pm.collectionVariables.get('groupMessageTextB'));",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "24 Get Group Messages",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenA}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBaseUrl}}/chats/{{groupChatId}}/messages",
+          "host": [
+            "{{apiBaseUrl}}"
+          ],
+          "path": [
+            "chats",
+            "{{groupChatId}}",
+            "messages"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.test('Backend returns ordered message history', function () {",
+              "pm.expect(body).to.be.an('array');",
+              "pm.expect(body).to.have.length(2);",
+              "pm.expect(body[0].content).to.eql(pm.collectionVariables.get('groupMessageTextA'));",
+              "pm.expect(body[1].content).to.eql(pm.collectionVariables.get('groupMessageTextB'));",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "25 Rename Group Chat",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenA}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBaseUrl}}/chats/{{groupChatId}}",
+          "host": [
+            "{{apiBaseUrl}}"
+          ],
+          "path": [
+            "chats",
+            "{{groupChatId}}"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"{{renamedGroupChatName}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.test('Group chat is renamed', function () {",
+              "pm.expect(body.name).to.eql(pm.collectionVariables.get('renamedGroupChatName'));",
+              "pm.expect(body.type).to.eql('GROUP');",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "26 Delete Group Chat",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenA}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBaseUrl}}/chats/{{groupChatId}}",
+          "host": [
+            "{{apiBaseUrl}}"
+          ],
+          "path": [
+            "chats",
+            "{{groupChatId}}"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 204', function () {",
+              "pm.response.to.have.status(204);",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "27 Verify Deleted Chat Returns 404",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenA}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBaseUrl}}/chats/{{groupChatId}}",
+          "host": [
+            "{{apiBaseUrl}}"
+          ],
+          "path": [
+            "chats",
+            "{{groupChatId}}"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 404', function () {",
+              "pm.response.to.have.status(404);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.test('Deleted chat message mentions not found', function () {",
+              "pm.expect(String(body.message).toLowerCase()).to.include('not found');",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "28 Verify Chats After Delete",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenA}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBaseUrl}}/chats",
+          "host": [
+            "{{apiBaseUrl}}"
+          ],
+          "path": [
+            "chats"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        const chatIds = body.map(function (chat) {",
+              "return String(chat.id);",
+              "        });",
+              "        pm.test('Group chat is gone and direct chat remains', function () {",
+              "pm.expect(chatIds).to.not.include(pm.collectionVariables.get('groupChatId'));",
+              "pm.expect(chatIds).to.include(pm.collectionVariables.get('directChatId'));",
+              "        });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "29 Verify Delete Did Not Break Related Entities API",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessTokenA}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBaseUrl}}/chats/{{directChatId}}/messages",
+          "host": [
+            "{{apiBaseUrl}}"
+          ],
+          "path": [
+            "chats",
+            "{{directChatId}}",
+            "messages"
+          ]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP status is 200', function () {",
+              "pm.response.to.have.status(200);",
+              "        });",
+              "        const body = pm.response.json();",
+              "        pm.test('Direct chat API still works after group deletion', function () {",
+              "pm.expect(body).to.be.an('array');",
+              "pm.expect(body[0].content).to.eql(pm.collectionVariables.get('directMessageText'));",
+              "        });"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
