@@ -5,11 +5,13 @@
     "apps/*"
   ],
   "scripts": {
+    "build:frontend": "npm --workspace @tegeran/frontend run build",
     "build:graphql-bff": "npm --workspace @tegeran/graphql-bff run build",
     "db:generate": "npm --workspace @tegeran/backend run db:generate",
     "db:migrate": "npm --workspace @tegeran/backend run db:migrate",
     "db:migrate:dev": "npm --workspace @tegeran/backend run db:migrate:dev",
     "db:status": "npm --workspace @tegeran/backend run db:status",
+    "start:frontend": "npm --workspace @tegeran/frontend run dev",
     "start:graphql-bff": "npm --workspace @tegeran/graphql-bff run start:dev",
     "test:backend": "npm --workspace @tegeran/backend run test",
     "test:auth:integration": "npm --workspace @tegeran/backend run test:auth:integration",

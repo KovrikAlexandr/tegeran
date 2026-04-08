@@ -106,5 +106,24 @@ services:
     ports:
       - "${GRAPHQL_BFF_PORT}:3001"
 
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+      args:
+        NEXT_PUBLIC_GRAPHQL_URL: http://localhost:${GRAPHQL_BFF_PORT}/graphql
+    container_name: tegeran-frontend
+    restart: unless-stopped
+    depends_on:
+      graphql-bff:
+        condition: service_started
+    env_file:
+      - .env
+    environment:
+      PORT: 3002
+      NEXT_PUBLIC_GRAPHQL_URL: http://localhost:${GRAPHQL_BFF_PORT}/graphql
+    ports:
+      - "${FRONTEND_PORT}:3002"
+
 volumes:
   postgres_data:
