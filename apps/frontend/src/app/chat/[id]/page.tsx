@@ -7,6 +7,7 @@ import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { ChatInfoPanel } from '@/components/chat-info-panel';
 import { MessageList } from '@/components/message-list';
 import { ProtectedView } from '@/components/protected-view';
+import { isAuthSessionError } from '@/lib/auth/session-expiration';
 import { getChatDisplayName, getChatSubtitle } from '@/lib/chat-view';
 import { useAuth } from '@/lib/auth/auth-context';
 import { loadChatPageData } from '@/lib/services/chat-service';
@@ -47,6 +48,10 @@ export default function ChatPage() {
           setData(nextData);
         }
       } catch (loadError) {
+        if (isAuthSessionError(loadError)) {
+          return;
+        }
+
         if (isActive) {
           setError(loadError instanceof Error ? loadError.message : 'Failed to load chat');
         }
@@ -84,6 +89,10 @@ export default function ChatPage() {
       const nextData = await loadChatPageData(token, chatId);
       setData(nextData);
     } catch (submissionError) {
+      if (isAuthSessionError(submissionError)) {
+        return;
+      }
+
       setError(
         submissionError instanceof Error ? submissionError.message : 'Message was not sent',
       );
@@ -113,7 +122,7 @@ export default function ChatPage() {
         {isLoading || !data ? (
           <section className="status-card">
             <p className="eyebrow">Loading</p>
-            <h2>Pulling the chat from GraphQL-BFF</h2>
+            <h2>Loading chat</h2>
           </section>
         ) : (
           <section className="chat-layout">

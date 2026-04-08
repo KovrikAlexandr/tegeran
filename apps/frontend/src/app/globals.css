@@ -208,29 +208,32 @@ main {
   flex-wrap: wrap;
 }
 
-.chat-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 18px;
-}
-
-.chat-actions-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 18px;
-  margin-bottom: 24px;
-}
-
 .action-form {
   display: grid;
   gap: 16px;
   align-content: start;
 }
 
+.inline-action-panel {
+  margin-bottom: 20px;
+  max-width: 720px;
+}
+
+.chat-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+}
+
 .chat-card {
   display: block;
   padding: 20px;
   border-radius: 24px;
+}
+
+.secondary-button-small {
+  padding: 10px 14px;
+  font-size: 0.92rem;
 }
 
 .chat-card-header {

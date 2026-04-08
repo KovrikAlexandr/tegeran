@@ -1,3 +1,7 @@
+import {
+  handleAuthSessionExpired,
+  shouldExpireSession,
+} from '@/lib/auth/session-expiration';
 import { GRAPHQL_BFF_URL } from '@/lib/config';
 
 interface GraphqlErrorPayload {
@@ -42,10 +46,18 @@ export async function graphqlRequest<TData, TVariables = Record<string, unknown>
   if (!response.ok) {
     const message = payload.errors?.[0]?.message ?? 'GraphQL request failed';
 
+    if (shouldExpireSession(message, response.status)) {
+      handleAuthSessionExpired();
+    }
+
     throw new GraphqlRequestError(message);
   }
 
   if (payload.errors?.length) {
+    if (shouldExpireSession(payload.errors[0].message, response.status)) {
+      handleAuthSessionExpired();
+    }
+
     throw new GraphqlRequestError(payload.errors[0].message);
   }
 
