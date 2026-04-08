@@ -2,7 +2,7 @@ import { CreateChatDaoInput, ChatsDao, MessagesDao, UsersDao } from '../contract
 import { CurrentUser } from '../domain/current-user';
 import { ConflictError } from '../domain/errors';
 import { ChatType } from '../domain/enums';
-import { Chat, ChatMember, Message, User } from '../domain/models';
+import { Chat, ChatLastMessage, ChatMember, Message, User } from '../domain/models';
 import { ChatsService } from '../services/chats.service';
 import { MessagesService } from '../services/messages.service';
 import { UsersService } from '../services/users.service';
@@ -79,7 +79,8 @@ class InMemoryChatsDao implements ChatsDao {
     return this.store.chats
       .filter((chat) => this.store.members.some((member) => member.chatId === chat.id && member.userId === userId))
       .map((chat) => this.buildChat(chat.id))
-      .filter((chat): chat is Chat => chat !== null);
+      .filter((chat): chat is Chat => chat !== null)
+      .sort((left, right) => this.compareChatsByLastMessage(left, right));
   }
 
   async findById(chatId: number): Promise<Chat | null> {
@@ -138,6 +139,17 @@ class InMemoryChatsDao implements ChatsDao {
     return this.buildChat(chat.id)!;
   }
 
+  async updateName(chatId: number, name: string): Promise<Chat> {
+    const chat = this.store.chats.find((item) => item.id === chatId);
+
+    if (!chat) {
+      throw new Error(`Missing chat with id "${chatId}"`);
+    }
+
+    chat.name = name;
+    return this.buildChat(chatId)!;
+  }
+
   async addMember(chatId: number, userId: number, role: ChatMember['role']): Promise<void> {
     this.store.members.push({
       id: this.store.nextMemberId++,
@@ -190,7 +202,34 @@ class InMemoryChatsDao implements ChatsDao {
       name: chat.name,
       type: chat.type,
       members,
+      lastMessage: this.getLastMessage(chat.id),
     };
+  }
+
+  private getLastMessage(chatId: number): ChatLastMessage | null {
+    const message = this.store.messages
+      .filter((item) => item.chatId === chatId)
+      .sort((left, right) => right.createdAt.getTime() - left.createdAt.getTime() || right.id - left.id)[0];
+
+    if (!message) {
+      return null;
+    }
+
+    return {
+      content: message.content,
+      createdAt: new Date(message.createdAt),
+    };
+  }
+
+  private compareChatsByLastMessage(left: Chat, right: Chat): number {
+    const leftTimestamp = left.lastMessage?.createdAt.getTime() ?? Number.NEGATIVE_INFINITY;
+    const rightTimestamp = right.lastMessage?.createdAt.getTime() ?? Number.NEGATIVE_INFINITY;
+
+    if (leftTimestamp !== rightTimestamp) {
+      return rightTimestamp - leftTimestamp;
+    }
+
+    return right.id - left.id;
   }
 }
 

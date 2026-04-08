@@ -41,7 +41,7 @@ model ChatMember {
   userId Int
   role   ChatMemberRole
 
-  chat Chat @relation(fields: [chatId], references: [id])
+  chat Chat @relation(fields: [chatId], references: [id], onDelete: Cascade)
   user User @relation(fields: [userId], references: [id])
 
   @@unique([chatId, userId])
@@ -56,7 +56,7 @@ model Message {
   createdAt DateTime @default(now())
 
   sender User @relation("MessageSender", fields: [senderId], references: [id])
-  chat   Chat @relation(fields: [chatId], references: [id])
+  chat   Chat @relation(fields: [chatId], references: [id], onDelete: Cascade)
 
   @@index([senderId])
   @@index([chatId, createdAt])

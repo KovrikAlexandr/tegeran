@@ -8,7 +8,9 @@ import {
   GetOrCreateCurrentUserInput,
   LeaveGroupChatInput,
   MessagesOutput,
+  RemoveGroupMemberByEmailInput,
   RemoveGroupMemberInput,
+  RenameGroupChatInput,
   SendMessageInput,
   UserOutput,
 } from './commands';
@@ -32,6 +34,8 @@ export interface ChatsServiceContract {
   leaveGroupChat(currentUser: CurrentUser, input: LeaveGroupChatInput): Promise<void>;
   getChatMembers(currentUser: CurrentUser, chatId: number): Promise<ChatMembersOutput>;
   removeGroupMember(currentUser: CurrentUser, input: RemoveGroupMemberInput): Promise<void>;
+  removeGroupMemberByEmail(currentUser: CurrentUser, input: RemoveGroupMemberByEmailInput): Promise<void>;
+  renameGroupChat(currentUser: CurrentUser, input: RenameGroupChatInput): Promise<ChatOutput>;
 }
 
 export interface MessagesServiceContract {

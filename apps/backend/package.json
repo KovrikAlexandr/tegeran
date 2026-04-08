@@ -9,8 +9,9 @@
     "db:status": "prisma migrate status",
     "start": "node dist/main.js",
     "start:dev": "tsx src/main.ts",
-    "test": "jest --runInBand --testPathIgnorePatterns=auth.integration.spec.ts",
-    "test:auth:integration": "jest --runInBand --runTestsByPath src/test/auth.integration.spec.ts"
+    "test": "jest --runInBand --testPathIgnorePatterns='auth.integration.spec.ts|frontend-scenarios.integration.spec.ts'",
+    "test:auth:integration": "jest --runInBand --runTestsByPath src/test/auth.integration.spec.ts",
+    "test:frontend:integration": "jest --runInBand --runTestsByPath src/test/frontend-scenarios.integration.spec.ts"
   },
   "dependencies": {
     "@nestjs/common": "11.1.7",

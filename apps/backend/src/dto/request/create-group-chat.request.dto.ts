@@ -1,4 +1,4 @@
-import { ArrayUnique, IsArray, IsInt, IsString, Min, MinLength } from 'class-validator';
+import { IsArray, IsEmail, IsString, MinLength } from 'class-validator';
 
 export class CreateGroupChatRequestDto {
   @IsString()
@@ -6,8 +6,6 @@ export class CreateGroupChatRequestDto {
   name!: string;
 
   @IsArray()
-  @ArrayUnique()
-  @IsInt({ each: true })
-  @Min(1, { each: true })
-  memberUserIds!: number[];
+  @IsEmail({}, { each: true })
+  memberEmails!: string[];
 }

@@ -14,12 +14,12 @@ export interface GetOrCreateCurrentUserInput {
 }
 
 export interface CreateDirectChatInput {
-  peerUserId: number;
+  email: string;
 }
 
 export interface CreateGroupChatInput {
   name: string;
-  memberUserIds: number[];
+  memberEmails: string[];
 }
 
 export interface DeleteGroupChatInput {
@@ -33,6 +33,16 @@ export interface LeaveGroupChatInput {
 export interface RemoveGroupMemberInput {
   chatId: number;
   memberUserId: number;
+}
+
+export interface RemoveGroupMemberByEmailInput {
+  chatId: number;
+  email: string;
+}
+
+export interface RenameGroupChatInput {
+  chatId: number;
+  name: string;
 }
 
 export interface SendMessageInput {

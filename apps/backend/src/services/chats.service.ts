@@ -5,13 +5,15 @@ import {
   CreateGroupChatInput,
   DeleteGroupChatInput,
   LeaveGroupChatInput,
+  RemoveGroupMemberByEmailInput,
   RemoveGroupMemberInput,
+  RenameGroupChatInput,
 } from '../contracts/commands';
 import { ChatsDao, UsersDao } from '../contracts/dao';
 import { ChatsServiceContract } from '../contracts/services';
 import { CHATS_DAO, USERS_DAO } from '../contracts/tokens';
 import { CurrentUser } from '../domain/current-user';
-import { AccessDeniedError, BusinessRuleError, ConflictError, NotFoundError } from '../domain/errors';
+import { AccessDeniedError, BusinessRuleError, NotFoundError } from '../domain/errors';
 import { ChatMemberRole, ChatType } from '../domain/enums';
 import { Chat } from '../domain/models';
 import { JsonLogger } from '../logging/json-logger.service';
@@ -45,32 +47,38 @@ export class ChatsService implements ChatsServiceContract {
   async createDirectChat(currentUser: CurrentUser, input: CreateDirectChatInput): Promise<Chat> {
     this.logger.debug('Attempting to create direct chat', 'ChatsService', {
       authSubject: currentUser.authSubject,
-      peerUserId: input.peerUserId,
+      peerEmail: input.email,
     });
     const user = await requireCurrentUser(this.usersDao, currentUser);
+    const normalizedEmail = input.email.trim().toLowerCase();
 
-    if (user.id === input.peerUserId) {
+    if (!normalizedEmail) {
+      throw new BusinessRuleError('Peer email is required');
+    }
+
+    if (user.email.toLowerCase() === normalizedEmail) {
       this.logger.warning('Rejected direct chat creation for same user', 'ChatsService', {
         userId: user.id,
+        email: normalizedEmail,
       });
       throw new BusinessRuleError('Direct chat requires two different users');
     }
 
-    const peer = await this.usersDao.findById(input.peerUserId);
+    const peer = await this.usersDao.findByEmail(normalizedEmail);
 
     if (!peer) {
-      throw new NotFoundError(`User with id "${input.peerUserId}" was not found`);
+      throw new NotFoundError(`User with email "${normalizedEmail}" was not found`);
     }
 
-    const existingChat = await this.chatsDao.findDirectChatBetweenUsers(user.id, input.peerUserId);
+    const existingChat = await this.chatsDao.findDirectChatBetweenUsers(user.id, peer.id);
 
     if (existingChat) {
-      this.logger.warning('Rejected duplicate direct chat creation', 'ChatsService', {
+      this.logger.info('Returned existing direct chat', 'ChatsService', {
         userId: user.id,
-        peerUserId: input.peerUserId,
+        peerUserId: peer.id,
         chatId: existingChat.id,
       });
-      throw new ConflictError('Direct chat already exists for this pair of users');
+      return existingChat;
     }
 
     const chat = await this.chatsDao.create({
@@ -100,7 +108,7 @@ export class ChatsService implements ChatsServiceContract {
   async createGroupChat(currentUser: CurrentUser, input: CreateGroupChatInput): Promise<Chat> {
     this.logger.debug('Attempting to create group chat', 'ChatsService', {
       authSubject: currentUser.authSubject,
-      requestedMemberCount: input.memberUserIds.length,
+      requestedMemberCount: input.memberEmails.length,
     });
     const user = await requireCurrentUser(this.usersDao, currentUser);
     const name = input.name.trim();
@@ -112,14 +120,21 @@ export class ChatsService implements ChatsServiceContract {
       throw new BusinessRuleError('Group chat name is required');
     }
 
-    const memberUserIds = [...new Set(input.memberUserIds)].filter((memberUserId) => memberUserId !== user.id);
+    const normalizedEmails = [...new Set(input.memberEmails.map((email) => email.trim().toLowerCase()).filter(Boolean))];
+    const memberUsers = [];
 
-    for (const memberUserId of memberUserIds) {
-      const member = await this.usersDao.findById(memberUserId);
+    for (const email of normalizedEmails) {
+      if (email === user.email.toLowerCase()) {
+        continue;
+      }
+
+      const member = await this.usersDao.findByEmail(email);
 
       if (!member) {
-        throw new NotFoundError(`User with id "${memberUserId}" was not found`);
+        throw new NotFoundError(`User with email "${email}" was not found`);
       }
+
+      memberUsers.push(member);
     }
 
     const chat = await this.chatsDao.create({
@@ -130,8 +145,8 @@ export class ChatsService implements ChatsServiceContract {
           userId: user.id,
           role: ChatMemberRole.OWNER,
         },
-        ...memberUserIds.map((memberUserId) => ({
-          userId: memberUserId,
+        ...memberUsers.map((member) => ({
+          userId: member.id,
           role: ChatMemberRole.MEMBER,
         })),
       ],
@@ -221,49 +236,59 @@ export class ChatsService implements ChatsServiceContract {
       chatId: input.chatId,
       memberUserId: input.memberUserId,
     });
+    await this.removeGroupMemberByUserId(currentUser, input.chatId, input.memberUserId);
+  }
+
+  async removeGroupMemberByEmail(currentUser: CurrentUser, input: RemoveGroupMemberByEmailInput): Promise<void> {
+    this.logger.debug('Attempting to remove group member by email', 'ChatsService', {
+      authSubject: currentUser.authSubject,
+      chatId: input.chatId,
+      email: input.email,
+    });
+    const normalizedEmail = input.email.trim().toLowerCase();
+
+    if (!normalizedEmail) {
+      throw new BusinessRuleError('Member email is required');
+    }
+
+    const targetUser = await this.usersDao.findByEmail(normalizedEmail);
+
+    if (!targetUser) {
+      throw new NotFoundError(`User with email "${normalizedEmail}" was not found`);
+    }
+
+    await this.removeGroupMemberByUserId(currentUser, input.chatId, targetUser.id);
+  }
+
+  async renameGroupChat(currentUser: CurrentUser, input: RenameGroupChatInput): Promise<Chat> {
+    this.logger.debug('Attempting to rename group chat', 'ChatsService', {
+      authSubject: currentUser.authSubject,
+      chatId: input.chatId,
+    });
     const { chat, currentMember } = await this.getAccessibleChatWithCurrentMember(currentUser, input.chatId);
+    const name = input.name.trim();
+
+    if (!name) {
+      throw new BusinessRuleError('Group chat name is required');
+    }
 
     if (chat.type === ChatType.DIRECT) {
-      this.logger.warning('Rejected member removal from direct chat', 'ChatsService', {
-        chatId: chat.id,
-        userId: currentMember.userId,
-      });
-      throw new BusinessRuleError('Cannot remove members from direct chat');
+      throw new BusinessRuleError('Direct chat cannot be renamed');
     }
 
     if (currentMember.role !== ChatMemberRole.OWNER) {
-      this.logger.warning('Rejected member removal by non-owner', 'ChatsService', {
-        chatId: chat.id,
-        userId: currentMember.userId,
-        memberUserId: input.memberUserId,
-      });
-      throw new AccessDeniedError('Only group owner can remove members');
+      throw new AccessDeniedError('Only group owner can rename group chat');
     }
 
-    const targetMember = chat.members.find((member) => member.userId === input.memberUserId);
+    const updatedChat = await this.chatsDao.updateName(chat.id, name);
 
-    if (!targetMember) {
-      this.logger.warning('Rejected removal of non-member', 'ChatsService', {
-        chatId: chat.id,
-        memberUserId: input.memberUserId,
-      });
-      throw new NotFoundError(`User with id "${input.memberUserId}" is not a member of chat "${chat.id}"`);
-    }
-
-    if (targetMember.role === ChatMemberRole.OWNER) {
-      this.logger.warning('Rejected owner removal from group chat', 'ChatsService', {
-        chatId: chat.id,
-        memberUserId: targetMember.userId,
-      });
-      throw new BusinessRuleError('Group owner cannot be removed from chat');
-    }
-
-    await this.chatsDao.removeMember(chat.id, targetMember.userId);
-    this.logger.info('Group member removed', 'ChatsService', {
-      chatId: chat.id,
-      removedUserId: targetMember.userId,
+    this.logger.info('Group chat renamed', 'ChatsService', {
+      chatId: updatedChat.id,
       ownerUserId: currentMember.userId,
+      name: updatedChat.name,
     });
+
+    return updatedChat;
   }
 
   private async getAccessibleChat(currentUser: CurrentUser, chatId: number): Promise<Chat> {
@@ -292,5 +317,51 @@ export class ChatsService implements ChatsServiceContract {
     }
 
     return { chat, currentMember };
+  }
+
+  private async removeGroupMemberByUserId(currentUser: CurrentUser, chatId: number, memberUserId: number): Promise<void> {
+    const { chat, currentMember } = await this.getAccessibleChatWithCurrentMember(currentUser, chatId);
+
+    if (chat.type === ChatType.DIRECT) {
+      this.logger.warning('Rejected member removal from direct chat', 'ChatsService', {
+        chatId: chat.id,
+        userId: currentMember.userId,
+      });
+      throw new BusinessRuleError('Cannot remove members from direct chat');
+    }
+
+    if (currentMember.role !== ChatMemberRole.OWNER) {
+      this.logger.warning('Rejected member removal by non-owner', 'ChatsService', {
+        chatId: chat.id,
+        userId: currentMember.userId,
+        memberUserId,
+      });
+      throw new AccessDeniedError('Only group owner can remove members');
+    }
+
+    const targetMember = chat.members.find((member) => member.userId === memberUserId);
+
+    if (!targetMember) {
+      this.logger.warning('Rejected removal of non-member', 'ChatsService', {
+        chatId: chat.id,
+        memberUserId,
+      });
+      throw new NotFoundError(`User with id "${memberUserId}" is not a member of chat "${chat.id}"`);
+    }
+
+    if (targetMember.role === ChatMemberRole.OWNER) {
+      this.logger.warning('Rejected owner removal from group chat', 'ChatsService', {
+        chatId: chat.id,
+        memberUserId: targetMember.userId,
+      });
+      throw new BusinessRuleError('Group owner cannot be removed from chat');
+    }
+
+    await this.chatsDao.removeMember(chat.id, targetMember.userId);
+    this.logger.info('Group member removed', 'ChatsService', {
+      chatId: chat.id,
+      removedUserId: targetMember.userId,
+      ownerUserId: currentMember.userId,
+    });
   }
 }

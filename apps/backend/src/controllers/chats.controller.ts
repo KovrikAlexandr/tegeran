@@ -1,8 +1,9 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
 
 import { RequestCurrentUser } from '../auth/request-current-user';
 import { CreateDirectChatRequestDto } from '../dto/request/create-direct-chat.request.dto';
 import { CreateGroupChatRequestDto } from '../dto/request/create-group-chat.request.dto';
+import { RenameChatRequestDto } from '../dto/request/rename-chat.request.dto';
 import { ChatResponseDto } from '../dto/response/chat.response.dto';
 import { CurrentUser } from '../domain/current-user';
 import { ChatsService } from '../services/chats.service';
@@ -26,13 +27,28 @@ export class ChatsController {
     return ChatResponseDto.fromDomain(chat);
   }
 
+  @Patch(':chatId')
+  async renameChat(
+    @RequestCurrentUser() currentUser: CurrentUser,
+    @Param('chatId', ParseIntPipe) chatId: number,
+    @Body() body: RenameChatRequestDto,
+  ): Promise<ChatResponseDto> {
+    const chat = await this.chatsService.renameGroupChat(currentUser, {
+      chatId,
+      name: body.name,
+    });
+
+    return ChatResponseDto.fromDomain(chat);
+  }
+
   @Post('direct')
-  async createDirectChat(
+  @HttpCode(200)
+  async createOrGetDirectChat(
     @RequestCurrentUser() currentUser: CurrentUser,
     @Body() body: CreateDirectChatRequestDto,
   ): Promise<ChatResponseDto> {
     const chat = await this.chatsService.createDirectChat(currentUser, {
-      peerUserId: body.peerUserId,
+      email: body.email,
     });
 
     return ChatResponseDto.fromDomain(chat);
@@ -45,7 +61,7 @@ export class ChatsController {
   ): Promise<ChatResponseDto> {
     const chat = await this.chatsService.createGroupChat(currentUser, {
       name: body.name,
-      memberUserIds: body.memberUserIds,
+      memberEmails: body.memberEmails,
     });
 
     return ChatResponseDto.fromDomain(chat);

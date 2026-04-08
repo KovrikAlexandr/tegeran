@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { ChatsDao, CreateChatDaoInput } from '../contracts/dao';
 import { ChatMemberRole, ChatType } from '../domain/enums';
-import { Chat, ChatMember, User } from '../domain/models';
+import { Chat, ChatLastMessage, ChatMember, User } from '../domain/models';
 import { JsonLogger } from '../logging/json-logger.service';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -10,6 +10,10 @@ type PrismaChatRecord = {
   id: number;
   name: string | null;
   type: 'DIRECT' | 'GROUP';
+  messages?: Array<{
+    content: string;
+    createdAt: Date;
+  }>;
   members: Array<{
     id: number;
     chatId: number;
@@ -40,6 +44,14 @@ export class PrismaChatsDao implements ChatsDao {
           },
         },
         include: {
+          messages: {
+            select: {
+              content: true,
+              createdAt: true,
+            },
+            orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+            take: 1,
+          },
           members: {
             include: {
               user: true,
@@ -49,13 +61,12 @@ export class PrismaChatsDao implements ChatsDao {
             },
           },
         },
-        orderBy: {
-          id: 'asc',
-        },
       }),
     );
 
-    return chats.map((chat) => this.mapChat(chat as PrismaChatRecord));
+    return chats
+      .map((chat) => this.mapChat(chat as PrismaChatRecord))
+      .sort((left, right) => this.compareChatsByLastMessage(left, right));
   }
 
   async findById(chatId: number): Promise<Chat | null> {
@@ -63,6 +74,14 @@ export class PrismaChatsDao implements ChatsDao {
       this.prisma.chat.findUnique({
         where: { id: chatId },
         include: {
+          messages: {
+            select: {
+              content: true,
+              createdAt: true,
+            },
+            orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+            take: 1,
+          },
           members: {
             include: {
               user: true,
@@ -88,6 +107,14 @@ export class PrismaChatsDao implements ChatsDao {
           },
         },
         include: {
+          messages: {
+            select: {
+              content: true,
+              createdAt: true,
+            },
+            orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+            take: 1,
+          },
           members: {
             include: {
               user: true,
@@ -131,6 +158,14 @@ export class PrismaChatsDao implements ChatsDao {
           ],
         },
         include: {
+          messages: {
+            select: {
+              content: true,
+              createdAt: true,
+            },
+            orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+            take: 1,
+          },
           members: {
             include: {
               user: true,
@@ -163,6 +198,14 @@ export class PrismaChatsDao implements ChatsDao {
             },
           },
           include: {
+            messages: {
+              select: {
+                content: true,
+                createdAt: true,
+              },
+              orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+              take: 1,
+            },
             members: {
               include: {
                 user: true,
@@ -173,6 +216,35 @@ export class PrismaChatsDao implements ChatsDao {
             },
           },
         }),
+    );
+
+    return this.mapChat(chat as PrismaChatRecord);
+  }
+
+  async updateName(chatId: number, name: string): Promise<Chat> {
+    const chat = await this.runQuery('updateName', { chatId, name }, () =>
+      this.prisma.chat.update({
+        where: { id: chatId },
+        data: { name },
+        include: {
+          messages: {
+            select: {
+              content: true,
+              createdAt: true,
+            },
+            orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+            take: 1,
+          },
+          members: {
+            include: {
+              user: true,
+            },
+            orderBy: {
+              id: 'asc',
+            },
+          },
+        },
+      }),
     );
 
     return this.mapChat(chat as PrismaChatRecord);
@@ -232,6 +304,20 @@ export class PrismaChatsDao implements ChatsDao {
       name: chat.name,
       type: chat.type as ChatType,
       members: chat.members.map((member) => this.mapMember(member)),
+      lastMessage: this.mapLastMessage(chat.messages),
+    };
+  }
+
+  private mapLastMessage(messages?: PrismaChatRecord['messages']): ChatLastMessage | null {
+    const message = messages?.[0];
+
+    if (!message) {
+      return null;
+    }
+
+    return {
+      content: message.content,
+      createdAt: message.createdAt,
     };
   }
 
@@ -252,5 +338,16 @@ export class PrismaChatsDao implements ChatsDao {
       name: user.name,
       email: user.email,
     };
+  }
+
+  private compareChatsByLastMessage(left: Chat, right: Chat): number {
+    const leftTimestamp = left.lastMessage?.createdAt.getTime() ?? Number.NEGATIVE_INFINITY;
+    const rightTimestamp = right.lastMessage?.createdAt.getTime() ?? Number.NEGATIVE_INFINITY;
+
+    if (leftTimestamp !== rightTimestamp) {
+      return rightTimestamp - leftTimestamp;
+    }
+
+    return right.id - left.id;
   }
 }

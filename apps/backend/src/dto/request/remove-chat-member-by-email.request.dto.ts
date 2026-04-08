@@ -1,6 +1,6 @@
 import { IsEmail } from 'class-validator';
 
-export class CreateDirectChatRequestDto {
+export class RemoveChatMemberByEmailRequestDto {
   @IsEmail()
   email!: string;
 }

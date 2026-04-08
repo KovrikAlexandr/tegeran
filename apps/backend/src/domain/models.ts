@@ -20,6 +20,7 @@ export interface Chat {
   name: string | null;
   type: ChatType;
   members: ChatMember[];
+  lastMessage: ChatLastMessage | null;
 }
 
 export interface Message {
@@ -27,5 +28,10 @@ export interface Message {
   content: string;
   senderId: number;
   chatId: number;
+  createdAt: Date;
+}
+
+export interface ChatLastMessage {
+  content: string;
   createdAt: Date;
 }
