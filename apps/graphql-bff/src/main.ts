@@ -30,6 +30,11 @@ async function bootstrap(): Promise<void> {
     graphqlPath: '/graphql',
     backendApiUrl: getBackendApiUrl(),
   });
+
+  app.enableCors({
+    origin: "https://telegram.ayutokintome.ru",
+    credentials: true
+  });
 }
 
 bootstrap().catch((error) => {
